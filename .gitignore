@@ -1,0 +1,33 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
+
+# Data (keep structure)
+customer-segmentation-api/data/*
+!customer-segmentation-api/data/.gitkeep
+customer-segmentation-api/outputs/*
+!customer-segmentation-api/outputs/.gitkeep
+

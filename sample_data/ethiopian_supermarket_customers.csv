@@ -1,0 +1,52 @@
+customer_id,age,annual_income,spending_score,gender,region,membership_tier,visit_frequency
+1,25,45000,65,Male,Addis Ababa,Gold,Weekly
+2,32,78000,82,Female,Dire Dawa,Platinum,Daily
+3,45,52000,45,Male,Hawassa,Silver,Monthly
+4,28,61000,73,Female,Bahir Dar,Gold,Weekly
+5,56,89000,38,Male,Mekelle,Platinum,Weekly
+6,23,32000,78,Female,Addis Ababa,Bronze,Daily
+7,41,67000,55,Male,Gondar,Gold,Weekly
+8,35,55000,68,Female,Jimma,Silver,Weekly
+9,48,95000,42,Male,Addis Ababa,Platinum,Monthly
+10,29,48000,85,Female,Adama,Gold,Daily
+11,52,72000,35,Male,Dire Dawa,Gold,Monthly
+12,27,38000,72,Female,Hawassa,Silver,Weekly
+13,39,84000,58,Male,Bahir Dar,Platinum,Weekly
+14,33,51000,76,Female,Mekelle,Gold,Daily
+15,44,63000,48,Male,Addis Ababa,Gold,Monthly
+16,26,42000,81,Female,Gondar,Silver,Daily
+17,58,102000,32,Male,Jimma,Platinum,Monthly
+18,31,56000,69,Female,Adama,Gold,Weekly
+19,47,78000,44,Male,Addis Ababa,Platinum,Weekly
+20,24,35000,88,Female,Dire Dawa,Bronze,Daily
+21,36,68000,62,Male,Hawassa,Gold,Weekly
+22,42,91000,41,Female,Bahir Dar,Platinum,Monthly
+23,30,47000,74,Male,Mekelle,Silver,Weekly
+24,55,85000,36,Female,Addis Ababa,Platinum,Monthly
+25,22,28000,92,Male,Gondar,Bronze,Daily
+26,38,59000,67,Female,Jimma,Gold,Weekly
+27,49,76000,49,Male,Adama,Gold,Monthly
+28,34,53000,71,Female,Addis Ababa,Silver,Weekly
+29,46,88000,39,Male,Dire Dawa,Platinum,Monthly
+30,27,44000,79,Female,Hawassa,Gold,Daily
+31,51,94000,33,Male,Bahir Dar,Platinum,Monthly
+32,29,49000,83,Female,Mekelle,Gold,Daily
+33,43,71000,52,Male,Addis Ababa,Gold,Weekly
+34,37,62000,64,Female,Gondar,Gold,Weekly
+35,54,98000,37,Male,Jimma,Platinum,Monthly
+36,25,36000,86,Female,Adama,Bronze,Daily
+37,40,74000,56,Male,Addis Ababa,Gold,Weekly
+38,33,57000,70,Female,Dire Dawa,Gold,Weekly
+39,48,82000,43,Male,Hawassa,Platinum,Monthly
+40,28,41000,77,Female,Bahir Dar,Silver,Daily
+41,57,105000,31,Male,Mekelle,Platinum,Monthly
+42,32,54000,75,Female,Addis Ababa,Gold,Weekly
+43,44,69000,51,Male,Gondar,Gold,Weekly
+44,26,39000,84,Female,Jimma,Silver,Daily
+45,50,87000,40,Male,Adama,Platinum,Monthly
+46,35,58000,66,Female,Addis Ababa,Gold,Weekly
+47,41,73000,54,Male,Dire Dawa,Gold,Weekly
+48,23,31000,89,Female,Hawassa,Bronze,Daily
+49,53,96000,34,Male,Bahir Dar,Platinum,Monthly
+50,30,50000,72,Female,Mekelle,Gold,Weekly
+
