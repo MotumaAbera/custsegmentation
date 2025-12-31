@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 revision: str = "001"
 down_revision: Union[str, None] = None
@@ -25,7 +26,7 @@ def upgrade() -> None:
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
-            server_default=sa.text("CURRENT_TIMESTAMP"),
+            server_default=sa.text("now()"),
             nullable=True,
         ),
         sa.PrimaryKeyConstraint("id"),
@@ -37,13 +38,13 @@ def upgrade() -> None:
         sa.Column("dataset_id", sa.Integer(), nullable=False),
         sa.Column("linkage", sa.String(length=50), nullable=False),
         sa.Column("n_clusters", sa.Integer(), nullable=False),
-        sa.Column("feature_config", sa.JSON(), nullable=True),
-        sa.Column("metrics", sa.JSON(), nullable=True),
+        sa.Column("feature_config", postgresql.JSON(astext_type=sa.Text()), nullable=True),
+        sa.Column("metrics", postgresql.JSON(astext_type=sa.Text()), nullable=True),
         sa.Column("dendrogram_path", sa.Text(), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
-            server_default=sa.text("CURRENT_TIMESTAMP"),
+            server_default=sa.text("now()"),
             nullable=True,
         ),
         sa.ForeignKeyConstraint(
@@ -60,7 +61,7 @@ def upgrade() -> None:
         sa.Column("run_id", sa.Integer(), nullable=False),
         sa.Column("row_index", sa.Integer(), nullable=False),
         sa.Column("cluster_label", sa.Integer(), nullable=False),
-        sa.Column("payload", sa.JSON(), nullable=True),
+        sa.Column("payload", postgresql.JSON(astext_type=sa.Text()), nullable=True),
         sa.ForeignKeyConstraint(
             ["run_id"],
             ["clustering_runs.id"],
