@@ -1,25 +1,31 @@
 :root {
-  --bg-primary: #0a0a0b;
-  --bg-secondary: #111113;
-  --bg-tertiary: #1a1a1d;
-  --bg-card: #151517;
-  --bg-elevated: #1e1e21;
+  /* Clean white background */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --bg-card: #ffffff;
+  --bg-elevated: #f9fafb;
   
-  --accent-primary: #c4a052;
-  --accent-secondary: #e6c96e;
-  --accent-muted: rgba(196, 160, 82, 0.15);
-  --accent-glow: rgba(196, 160, 82, 0.4);
+  /* Blue accent - #132787 */
+  --accent-primary: #132787;
+  --accent-secondary: #1a3399;
+  --accent-light: #2442a8;
+  --accent-muted: rgba(19, 39, 135, 0.08);
+  --accent-glow: rgba(19, 39, 135, 0.2);
   
-  --text-primary: #fafafa;
-  --text-secondary: #a1a1a6;
-  --text-muted: #6b6b70;
+  /* Black text on white background */
+  --text-primary: #000000;
+  --text-secondary: #374151;
+  --text-muted: #6b7280;
   
-  --border-color: #2a2a2e;
-  --border-accent: rgba(196, 160, 82, 0.3);
+  /* Clean borders */
+  --border-color: #e5e7eb;
+  --border-accent: rgba(19, 39, 135, 0.25);
   
-  --success: #4ade80;
-  --error: #f87171;
-  --warning: #fbbf24;
+  /* Status colors - using blue tints */
+  --success: #132787;
+  --error: #dc2626;
+  --warning: #132787;
   
   --radius-sm: 6px;
   --radius-md: 12px;
@@ -30,10 +36,11 @@
   --font-body: 'Sora', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 60px var(--accent-glow);
+  /* Clean shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 4px 20px rgba(19, 39, 135, 0.25);
 }
 
 * {
@@ -64,15 +71,15 @@ body::before {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(196, 160, 82, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(196, 160, 82, 0.05) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(19, 39, 135, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(19, 39, 135, 0.04) 0%, transparent 50%);
   pointer-events: none;
   z-index: -1;
 }
 
 ::selection {
   background: var(--accent-primary);
-  color: var(--bg-primary);
+  color: #ffffff;
 }
 
 ::-webkit-scrollbar {
@@ -80,16 +87,16 @@ body::before {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--accent-primary);
 }
 
 button {
@@ -107,5 +114,67 @@ input, textarea, select {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+  
+  :root {
+    --radius-xl: 20px;
+    --radius-lg: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+  
+  :root {
+    --radius-xl: 16px;
+    --radius-lg: 12px;
+  }
+}
+
+/* Touch-friendly tap targets */
+@media (hover: none) and (pointer: coarse) {
+  button, 
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  [role="button"] {
+    min-height: 44px;
+  }
+}
+
+/* Smooth scrolling on iOS */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent zoom on input focus (iOS) */
+@media (max-width: 480px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Safe area for notched phones */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Hide scrollbar on mobile while keeping functionality */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
 }
 

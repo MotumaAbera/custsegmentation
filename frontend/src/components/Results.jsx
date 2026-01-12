@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion';
-import { BarChart3, Target, Layers, TrendingUp, Image, Users } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { getDendrogramUrl } from '../services/api';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BarChart3, Target, Layers, TrendingUp, Image, Users, Table, Download, Sparkles } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import styles from './Results.module.css';
 
 const CLUSTER_COLORS = [
@@ -9,17 +9,37 @@ const CLUSTER_COLORS = [
   '#fb923c', '#22d3d8', '#f87171', '#84cc16', '#e879f9',
 ];
 
+const TABS = [
+  { id: 'overview', label: 'Overview', icon: BarChart3 },
+  { id: 'distribution', label: 'Distribution', icon: Layers },
+  { id: 'dendrogram', label: 'Dendrogram', icon: Image },
+];
+
 export default function Results({ run }) {
+  const [activeTab, setActiveTab] = useState('overview');
+
   if (!run) return null;
 
   const { metrics, feature_config } = run;
   const clusterData = metrics?.cluster_sizes
     ? Object.entries(metrics.cluster_sizes).map(([label, count]) => ({
         name: `Cluster ${parseInt(label) + 1}`,
+        shortName: `C${parseInt(label) + 1}`,
         value: count,
         label: parseInt(label),
+        percentage: ((count / metrics.n_samples) * 100).toFixed(1),
       }))
     : [];
+
+  const getSilhouetteRating = (score) => {
+    if (score === null || score === undefined) return { label: 'N/A', color: 'var(--text-muted)' };
+    if (score > 0.7) return { label: 'Excellent', color: 'var(--success)' };
+    if (score > 0.5) return { label: 'Good', color: '#4ade80' };
+    if (score > 0.25) return { label: 'Fair', color: 'var(--warning)' };
+    return { label: 'Poor', color: 'var(--error)' };
+  };
+
+  const rating = getSilhouetteRating(metrics?.silhouette_score);
 
   return (
     <motion.div
@@ -29,147 +49,326 @@ export default function Results({ run }) {
       transition={{ duration: 0.5 }}
     >
       <div className={styles.header}>
-        <div className={styles.iconWrapper}>
-          <BarChart3 size={20} />
+        <div className={styles.headerLeft}>
+          <div className={styles.iconWrapper}>
+            <Sparkles size={20} />
+          </div>
+          <div>
+            <h3 className={styles.title}>Clustering Results</h3>
+            <span className={styles.subtitle}>{run.linkage_method?.toUpperCase() || 'WARD'} linkage</span>
+          </div>
         </div>
-        <h3 className={styles.title}>Clustering Results</h3>
-        <span className={styles.runId}>Run #{run.id}</span>
+        {run.dendrogram && (
+          <motion.a
+            href={run.dendrogram}
+            download="dendrogram.png"
+            className={styles.downloadBtn}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Download size={16} />
+            Export
+          </motion.a>
+        )}
       </div>
 
-      <div className={styles.grid}>
-        <div className={styles.statsGrid}>
-          <StatCard
-            icon={<Users size={20} />}
-            label="Samples"
-            value={metrics?.n_samples || 0}
-          />
-          <StatCard
-            icon={<Layers size={20} />}
-            label="Clusters"
-            value={metrics?.n_clusters || run.n_clusters}
-          />
-          <StatCard
-            icon={<Target size={20} />}
-            label="Features"
-            value={metrics?.n_encoded_features || 0}
-          />
-          <StatCard
-            icon={<TrendingUp size={20} />}
-            label="Silhouette"
-            value={metrics?.silhouette_score?.toFixed(3) || 'N/A'}
-            highlight={metrics?.silhouette_score > 0.5}
-          />
-        </div>
+      {/* Tabs */}
+      <div className={styles.tabs}>
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <motion.button
+              key={tab.id}
+              className={`${styles.tab} ${activeTab === tab.id ? styles.activeTab : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+              whileHover={{ y: -2 }}
+              whileTap={{ y: 0 }}
+            >
+              <Icon size={16} />
+              {tab.label}
+            </motion.button>
+          );
+        })}
+      </div>
 
-        {clusterData.length > 0 && (
-          <div className={styles.chartCard}>
-            <h4 className={styles.cardTitle}>Cluster Distribution</h4>
-            <div className={styles.chartWrapper}>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={clusterData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {clusterData.map((entry, index) => (
-                      <Cell
-                        key={entry.name}
-                        fill={CLUSTER_COLORS[index % CLUSTER_COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      background: '#1a1a1d',
-                      border: '1px solid #2a2a2e',
-                      borderRadius: '8px',
-                      color: '#fafafa',
-                    }}
+      <AnimatePresence mode="wait">
+        {activeTab === 'overview' && (
+          <motion.div
+            key="overview"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className={styles.tabContent}
+          >
+            {/* Stats Cards */}
+            <div className={styles.statsGrid}>
+              <StatCard
+                icon={<Users size={22} />}
+                label="Total Samples"
+                value={metrics?.n_samples || 0}
+                color="var(--accent-primary)"
+              />
+              <StatCard
+                icon={<Layers size={22} />}
+                label="Clusters"
+                value={metrics?.n_clusters || run.n_clusters}
+                color="#60a5fa"
+              />
+              <StatCard
+                icon={<Target size={22} />}
+                label="Features"
+                value={metrics?.n_encoded_features || 0}
+                color="#a78bfa"
+              />
+              <div className={styles.silhouetteCard}>
+                <div className={styles.silhouetteHeader}>
+                  <TrendingUp size={22} />
+                  <span>Silhouette Score</span>
+                </div>
+                <div className={styles.silhouetteValue}>
+                  <span className={styles.scoreNumber}>
+                    {metrics?.silhouette_score?.toFixed(3) || 'N/A'}
+                  </span>
+                  <span className={styles.scoreRating} style={{ color: rating.color }}>
+                    {rating.label}
+                  </span>
+                </div>
+                <div className={styles.scoreBar}>
+                  <motion.div
+                    className={styles.scoreBarFill}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.max(0, (metrics?.silhouette_score || 0) + 1) * 50}%` }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                    style={{ background: rating.color }}
                   />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className={styles.legend}>
-                {clusterData.map((entry, index) => (
-                  <div key={entry.name} className={styles.legendItem}>
-                    <span
-                      className={styles.legendDot}
-                      style={{ background: CLUSTER_COLORS[index % CLUSTER_COLORS.length] }}
-                    />
-                    <span className={styles.legendLabel}>{entry.name}</span>
-                    <span className={styles.legendValue}>{entry.value}</span>
-                  </div>
-                ))}
+                </div>
+                <div className={styles.scoreScale}>
+                  <span>-1</span>
+                  <span>0</span>
+                  <span>+1</span>
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Feature Config */}
+            {feature_config && (
+              <div className={styles.featureCard}>
+                <h4 className={styles.cardTitle}>
+                  <Table size={16} />
+                  Feature Configuration
+                </h4>
+                <div className={styles.featureGrid}>
+                  {feature_config.numeric_features?.length > 0 && (
+                    <div className={styles.featureGroup}>
+                      <span className={styles.featureLabel}>Numeric ({feature_config.numeric_features.length})</span>
+                      <div className={styles.featureTags}>
+                        {feature_config.numeric_features.map((f) => (
+                          <motion.span
+                            key={f}
+                            className={styles.featureTag}
+                            whileHover={{ scale: 1.05 }}
+                          >
+                            {f}
+                          </motion.span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {feature_config.categorical_features?.length > 0 && (
+                    <div className={styles.featureGroup}>
+                      <span className={styles.featureLabel}>Categorical ({feature_config.categorical_features.length})</span>
+                      <div className={styles.featureTags}>
+                        {feature_config.categorical_features.map((f) => (
+                          <motion.span
+                            key={f}
+                            className={`${styles.featureTag} ${styles.cat}`}
+                            whileHover={{ scale: 1.05 }}
+                          >
+                            {f}
+                          </motion.span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {feature_config.pca_applied && (
+                  <div className={styles.pcaBadge}>
+                    <Sparkles size={14} />
+                    PCA applied: {feature_config.pca_components} components
+                    ({(feature_config.pca_explained_variance * 100).toFixed(1)}% variance explained)
+                  </div>
+                )}
+              </div>
+            )}
+          </motion.div>
         )}
 
-        {feature_config && (
-          <div className={styles.featureCard}>
-            <h4 className={styles.cardTitle}>Feature Configuration</h4>
-            <div className={styles.featureList}>
-              {feature_config.numeric_features?.length > 0 && (
-                <div className={styles.featureGroup}>
-                  <span className={styles.featureLabel}>Numeric</span>
-                  <div className={styles.featureTags}>
-                    {feature_config.numeric_features.map((f) => (
-                      <span key={f} className={styles.featureTag}>{f}</span>
-                    ))}
+        {activeTab === 'distribution' && (
+          <motion.div
+            key="distribution"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className={styles.tabContent}
+          >
+            <div className={styles.chartsGrid}>
+              {/* Pie Chart */}
+              <div className={styles.chartCard}>
+                <h4 className={styles.cardTitle}>Segment Distribution</h4>
+                <div className={styles.pieWrapper}>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <PieChart>
+                      <Pie
+                        data={clusterData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={4}
+                        dataKey="value"
+                        animationBegin={0}
+                        animationDuration={800}
+                      >
+                        {clusterData.map((entry, index) => (
+                          <Cell
+                            key={entry.name}
+                            fill={CLUSTER_COLORS[index % CLUSTER_COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        content={<CustomTooltip />}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className={styles.pieCenter}>
+                    <span className={styles.pieCenterValue}>{metrics?.n_clusters}</span>
+                    <span className={styles.pieCenterLabel}>Segments</span>
                   </div>
                 </div>
-              )}
-              {feature_config.categorical_features?.length > 0 && (
-                <div className={styles.featureGroup}>
-                  <span className={styles.featureLabel}>Categorical</span>
-                  <div className={styles.featureTags}>
-                    {feature_config.categorical_features.map((f) => (
-                      <span key={f} className={`${styles.featureTag} ${styles.cat}`}>{f}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {feature_config.pca_applied && (
-                <div className={styles.pcaInfo}>
-                  <span>PCA: {feature_config.pca_components} components</span>
-                  <span>({(feature_config.pca_explained_variance * 100).toFixed(1)}% variance)</span>
-                </div>
-              )}
+              </div>
+
+              {/* Bar Chart */}
+              <div className={styles.chartCard}>
+                <h4 className={styles.cardTitle}>Cluster Sizes</h4>
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={clusterData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" horizontal={false} />
+                    <XAxis type="number" stroke="var(--text-muted)" fontSize={12} />
+                    <YAxis dataKey="shortName" type="category" stroke="var(--text-muted)" fontSize={12} width={40} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="value" radius={[0, 6, 6, 0]} animationDuration={800}>
+                      {clusterData.map((entry, index) => (
+                        <Cell
+                          key={entry.name}
+                          fill={CLUSTER_COLORS[index % CLUSTER_COLORS.length]}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          </div>
+
+            {/* Legend */}
+            <div className={styles.legendGrid}>
+              {clusterData.map((entry, index) => (
+                <motion.div
+                  key={entry.name}
+                  className={styles.legendCard}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
+                >
+                  <div
+                    className={styles.legendColor}
+                    style={{ background: CLUSTER_COLORS[index % CLUSTER_COLORS.length] }}
+                  />
+                  <div className={styles.legendInfo}>
+                    <span className={styles.legendName}>{entry.name}</span>
+                    <span className={styles.legendCount}>{entry.value} customers</span>
+                  </div>
+                  <span className={styles.legendPercent}>{entry.percentage}%</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         )}
 
-        <div className={styles.dendrogramCard}>
-          <h4 className={styles.cardTitle}>
-            <Image size={16} />
-            Dendrogram
-          </h4>
-          <div className={styles.dendrogramWrapper}>
-            <img
-              src={getDendrogramUrl(run.id)}
-              alt="Dendrogram"
-              className={styles.dendrogram}
-            />
-          </div>
-        </div>
+        {activeTab === 'dendrogram' && (
+          <motion.div
+            key="dendrogram"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className={styles.tabContent}
+          >
+            <div className={styles.dendrogramCard}>
+              <div className={styles.dendrogramHeader}>
+                <h4 className={styles.cardTitle}>
+                  <Image size={16} />
+                  Hierarchical Clustering Dendrogram
+                </h4>
+                <p className={styles.dendrogramHint}>
+                  The dendrogram shows how clusters are merged at different distances.
+                  Vertical lines indicate merges; height shows dissimilarity.
+                </p>
+              </div>
+              <div className={styles.dendrogramWrapper}>
+                {run.dendrogram ? (
+                  <motion.img
+                    src={run.dendrogram}
+                    alt="Dendrogram"
+                    className={styles.dendrogram}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  />
+                ) : (
+                  <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                    Dendrogram not available
+                  </p>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function StatCard({ icon, label, value, color }) {
+  return (
+    <motion.div
+      className={styles.statCard}
+      whileHover={{ y: -4, boxShadow: '0 12px 40px rgba(0,0,0,0.3)' }}
+    >
+      <div className={styles.statIcon} style={{ color }}>{icon}</div>
+      <div className={styles.statContent}>
+        <motion.span
+          className={styles.statValue}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 300 }}
+        >
+          {value}
+        </motion.span>
+        <span className={styles.statLabel}>{label}</span>
       </div>
     </motion.div>
   );
 }
 
-function StatCard({ icon, label, value, highlight }) {
+function CustomTooltip({ active, payload }) {
+  if (!active || !payload?.length) return null;
+
+  const data = payload[0].payload;
   return (
-    <div className={`${styles.statCard} ${highlight ? styles.highlight : ''}`}>
-      <div className={styles.statIcon}>{icon}</div>
-      <div className={styles.statContent}>
-        <span className={styles.statValue}>{value}</span>
-        <span className={styles.statLabel}>{label}</span>
-      </div>
+    <div className={styles.customTooltip}>
+      <strong>{data.name}</strong>
+      <p>{data.value} customers ({data.percentage}%)</p>
     </div>
   );
 }
-

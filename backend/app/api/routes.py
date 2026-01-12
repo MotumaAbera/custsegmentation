@@ -76,6 +76,60 @@ async def list_datasets(db: AsyncSession = Depends(get_db)):
     )
 
 
+@router.delete(
+    "/datasets/{dataset_id}",
+    status_code=status.HTTP_200_OK,
+    tags=["Datasets"],
+)
+async def delete_dataset(
+    dataset_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete a dataset and all associated clustering runs and assignments."""
+    result = await db.execute(select(Dataset).where(Dataset.id == dataset_id))
+    dataset = result.scalar_one_or_none()
+
+    if not dataset:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Dataset with id {dataset_id} not found",
+        )
+
+    # Delete associated clustering runs (cascade will handle assignments)
+    await db.execute(
+        select(ClusteringRun).where(ClusteringRun.dataset_id == dataset_id)
+    )
+    runs_result = await db.execute(
+        select(ClusteringRun).where(ClusteringRun.dataset_id == dataset_id)
+    )
+    runs = runs_result.scalars().all()
+
+    # Delete dendrogram files
+    for run in runs:
+        if run.dendrogram_path:
+            dendrogram_path = Path(run.dendrogram_path)
+            if dendrogram_path.exists():
+                dendrogram_path.unlink()
+
+    # Delete clustering runs and their assignments
+    for run in runs:
+        await db.execute(
+            select(ClusterAssignment).where(ClusterAssignment.run_id == run.id)
+        )
+        await db.delete(run)
+
+    # Delete the dataset file
+    dataset_file = Path(dataset.file_path)
+    if dataset_file.exists():
+        dataset_file.unlink()
+
+    # Delete the dataset record
+    await db.delete(dataset)
+    await db.flush()
+
+    return {"message": "Dataset deleted successfully", "id": dataset_id}
+
+
 @router.post(
     "/clustering/train",
     response_model=ClusteringRunResponse,

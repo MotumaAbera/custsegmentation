@@ -23,7 +23,7 @@ export default function Header() {
         <nav className={styles.nav}>
           <span className={styles.tagline}>
             <Sparkles size={14} />
-            Ethiopian Supermarket Analytics
+            ML-Powered Customer Insights
           </span>
         </nav>
       </div>

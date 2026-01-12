@@ -3,104 +3,228 @@
   background: var(--bg-card);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-color);
+  margin-top: 2rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border-color);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .iconWrapper {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-  color: var(--bg-primary);
+  background: #132787;
+  color: #ffffff;
   border-radius: var(--radius-md);
+  flex-shrink: 0;
 }
 
 .title {
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: 1.375rem;
   font-weight: 400;
   color: var(--text-primary);
-  flex: 1;
 }
 
-.runId {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+.subtitle {
+  font-size: 0.8125rem;
   color: var(--text-muted);
-  background: var(--bg-tertiary);
-  padding: 0.375rem 0.75rem;
-  border-radius: var(--radius-sm);
 }
 
-.grid {
+.downloadBtn {
   display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
+.downloadBtn:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.375rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+  flex: 1;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text-secondary);
+}
+
+.tab.activeTab {
+  background: var(--bg-card);
+  color: var(--accent-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.tabContent {
+  min-height: 300px;
+}
+
+/* Stats Grid */
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr) 1.5fr;
   gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .statCard {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
+  gap: 0.875rem;
+  padding: 1.25rem;
   background: var(--bg-tertiary);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
-}
-
-.statCard.highlight {
-  border-color: var(--success);
-  background: rgba(74, 222, 128, 0.05);
+  transition: all 0.3s ease;
 }
 
 .statIcon {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-primary);
-  color: var(--accent-primary);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
 }
 
 .statContent {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
+  min-width: 0;
 }
 
 .statValue {
   font-family: var(--font-mono);
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
 .statLabel {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--text-muted);
 }
 
-.chartCard,
-.featureCard,
-.dendrogramCard {
+/* Silhouette Card */
+.silhouetteCard {
+  padding: 1.25rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.silhouetteHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.silhouetteValue {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.scoreNumber {
+  font-family: var(--font-mono);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.scoreRating {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+}
+
+.scoreBar {
+  height: 6px;
+  background: var(--bg-primary);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.375rem;
+}
+
+.scoreBarFill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.scoreScale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+/* Feature Card */
+.featureCard {
   padding: 1.25rem;
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);
@@ -117,46 +241,10 @@
   margin-bottom: 1rem;
 }
 
-.chartWrapper {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.legend {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.legendItem {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8125rem;
-}
-
-.legendDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.legendLabel {
-  color: var(--text-secondary);
-}
-
-.legendValue {
-  font-family: var(--font-mono);
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-left: auto;
-}
-
-.featureList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
 .featureGroup {
@@ -167,7 +255,7 @@
 
 .featureLabel {
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -184,9 +272,10 @@
   font-size: 0.75rem;
   color: var(--accent-primary);
   background: var(--accent-muted);
-  padding: 0.25rem 0.625rem;
+  padding: 0.3rem 0.625rem;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-accent);
+  cursor: default;
 }
 
 .featureTag.cat {
@@ -195,35 +284,510 @@
   border-color: rgba(96, 165, 250, 0.3);
 }
 
-.pcaInfo {
+.pcaBadge {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(167, 139, 250, 0.1);
+  color: #a78bfa;
   font-size: 0.8125rem;
-  color: var(--text-secondary);
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  flex-wrap: wrap;
+}
+
+/* Charts */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chartCard {
+  padding: 1.25rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.pieWrapper {
+  position: relative;
+}
+
+.pieCenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.pieCenterValue {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pieCenterLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Legend */
+.legendGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.legendCard {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  cursor: default;
+}
+
+.legendColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.legendName {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.legendCount {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.legendPercent {
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+/* Dendrogram */
+.dendrogramCard {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.dendrogramHeader {
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dendrogramHint {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.5;
 }
 
 .dendrogramWrapper {
   background: #ffffff;
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  padding: 1rem;
+  overflow-x: auto;
 }
 
 .dendrogram {
   width: 100%;
   height: auto;
   display: block;
+  min-width: 500px;
 }
 
-@media (max-width: 768px) {
+/* Custom Tooltip */
+.customTooltip {
+  padding: 0.75rem 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.customTooltip strong {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.customTooltip p {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Large Tablet */
+@media (max-width: 1024px) {
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .chartWrapper {
-    flex-direction: column;
+  .chartsGrid {
+    grid-template-columns: 1fr;
   }
 }
 
+/* Small Tablet */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    margin-top: 1.25rem;
+  }
+
+  .header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.875rem;
+  }
+
+  .headerLeft {
+    gap: 0.625rem;
+  }
+
+  .iconWrapper {
+    width: 36px;
+    height: 36px;
+  }
+
+  .iconWrapper svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .title {
+    font-size: 1.125rem;
+  }
+
+  .subtitle {
+    font-size: 0.75rem;
+  }
+
+  .downloadBtn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.625rem;
+  }
+
+  .statCard {
+    padding: 0.875rem;
+    gap: 0.625rem;
+  }
+
+  .statIcon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .statIcon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .statValue {
+    font-size: 1.125rem;
+  }
+
+  .statLabel {
+    font-size: 0.75rem;
+  }
+
+  .tabs {
+    margin-bottom: 1rem;
+    padding: 0.25rem;
+    gap: 0.25rem;
+  }
+
+  .tab {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+    gap: 0.375rem;
+  }
+
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .legendGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .chartsGrid {
+    gap: 1rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .container {
+    padding: 0.875rem;
+    margin-top: 1rem;
+  }
+
+  .header {
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.875rem;
+    gap: 0.75rem;
+  }
+
+  .headerLeft {
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .iconWrapper {
+    width: 32px;
+    height: 32px;
+  }
+
+  .iconWrapper svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .title {
+    font-size: 1rem;
+  }
+
+  .subtitle {
+    font-size: 0.6875rem;
+  }
+
+  .downloadBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem;
+    min-height: 44px;
+  }
+
+  .tabs {
+    margin-bottom: 0.875rem;
+    padding: 0.1875rem;
+    gap: 0.1875rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
+    padding: 0.5rem 0.625rem;
+    font-size: 0.75rem;
+    gap: 0.25rem;
+    min-height: 40px;
+    white-space: nowrap;
+    flex: none;
+  }
+
+  .tab svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .tabContent {
+    min-height: auto;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .statCard {
+    padding: 0.75rem;
+    gap: 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .statIcon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .statValue {
+    font-size: 1rem;
+  }
+
+  .statLabel {
+    font-size: 0.6875rem;
+  }
+
+  .silhouetteCard {
+    padding: 0.875rem;
+  }
+
+  .silhouetteHeader {
+    font-size: 0.8125rem;
+    margin-bottom: 0.5rem;
+    gap: 0.375rem;
+  }
+
+  .silhouetteValue {
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .scoreNumber {
+    font-size: 1.375rem;
+  }
+
+  .scoreRating {
+    font-size: 0.75rem;
+    padding: 0.1875rem 0.5rem;
+  }
+
+  .scoreScale {
+    font-size: 0.625rem;
+  }
+
+  .chartCard {
+    padding: 0.875rem;
+  }
+
+  .cardTitle {
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+    gap: 0.375rem;
+  }
+
+  .pieCenterValue {
+    font-size: 1.25rem;
+  }
+
+  .pieCenterLabel {
+    font-size: 0.625rem;
+  }
+
+  .legendGrid {
+    grid-template-columns: 1fr;
+    gap: 0.375rem;
+  }
+
+  .legendCard {
+    padding: 0.625rem 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .legendColor {
+    width: 10px;
+    height: 10px;
+  }
+
+  .legendName {
+    font-size: 0.8125rem;
+  }
+
+  .legendCount {
+    font-size: 0.6875rem;
+  }
+
+  .legendPercent {
+    font-size: 0.8125rem;
+  }
+
+  .featureCard {
+    padding: 0.875rem;
+  }
+
+  .featureLabel {
+    font-size: 0.6875rem;
+  }
+
+  .featureTag {
+    font-size: 0.625rem;
+    padding: 0.1875rem 0.375rem;
+  }
+
+  .pcaBadge {
+    font-size: 0.6875rem;
+    padding: 0.5rem 0.625rem;
+    margin-top: 0.75rem;
+  }
+
+  .chartsGrid {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .dendrogramCard {
+    margin-top: 0.5rem;
+  }
+
+  .dendrogramHeader {
+    padding: 0.875rem;
+  }
+
+  .cardTitle {
+    font-size: 0.875rem;
+  }
+
+  .dendrogramHint {
+    font-size: 0.6875rem;
+    margin-top: 0.375rem;
+  }
+
+  .dendrogramWrapper {
+    padding: 0.75rem;
+  }
+
+  .dendrogram {
+    min-width: 400px;
+  }
+}
+
+/* Very small mobile */
+@media (max-width: 360px) {
+  .container {
+    padding: 0.75rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statCard {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .tab {
+    font-size: 0.6875rem;
+    padding: 0.4375rem 0.5rem;
+  }
+
+  .tab svg {
+    display: none;
+  }
+}

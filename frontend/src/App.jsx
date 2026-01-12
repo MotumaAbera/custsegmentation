@@ -5,18 +5,30 @@ import FileUpload from './components/FileUpload';
 import DatasetList from './components/DatasetList';
 import ClusteringConfig from './components/ClusteringConfig';
 import Results from './components/Results';
-import { uploadDataset, getDatasets, trainClustering } from './services/api';
+import StepIndicator from './components/StepIndicator';
+import { ToastContainer } from './components/Toast';
+import { uploadDataset, getDatasets, trainClustering, deleteDataset } from './services/api';
 import { useApi } from './hooks/useApi';
+import { useToast } from './hooks/useToast';
 import styles from './App.module.css';
 
 export default function App() {
   const [datasets, setDatasets] = useState([]);
   const [selectedDataset, setSelectedDataset] = useState(null);
   const [clusteringResult, setClusteringResult] = useState(null);
+  const { toasts, removeToast, success, error } = useToast();
 
   const uploadApi = useApi(uploadDataset);
   const datasetsApi = useApi(getDatasets);
   const trainApi = useApi(trainClustering);
+  const deleteApi = useApi(deleteDataset);
+
+  // Calculate current step
+  const getCurrentStep = () => {
+    if (clusteringResult) return 3;
+    if (selectedDataset) return 2;
+    return 1;
+  };
 
   const fetchDatasets = useCallback(async () => {
     try {
@@ -36,8 +48,10 @@ export default function App() {
       const result = await uploadApi.execute(file);
       await fetchDatasets();
       setSelectedDataset(result);
+      setClusteringResult(null);
+      success(`Dataset "${file.name}" uploaded successfully!`);
     } catch (err) {
-      console.error('Upload failed:', err);
+      error(uploadApi.error || 'Failed to upload dataset');
     }
   };
 
@@ -45,8 +59,9 @@ export default function App() {
     try {
       const result = await trainApi.execute(params);
       setClusteringResult(result);
+      success(`Clustering complete! Found ${result.metrics?.n_clusters || params.n_clusters} customer segments.`);
     } catch (err) {
-      console.error('Training failed:', err);
+      error(trainApi.error || 'Clustering failed. Please try again.');
     }
   };
 
@@ -55,9 +70,29 @@ export default function App() {
     setClusteringResult(null);
   };
 
+  const handleReset = () => {
+    setClusteringResult(null);
+  };
+
+  const handleDeleteDataset = async (datasetId) => {
+    try {
+      await deleteApi.execute(datasetId);
+      // If the deleted dataset was selected, clear selection
+      if (selectedDataset?.id === datasetId) {
+        setSelectedDataset(null);
+        setClusteringResult(null);
+      }
+      await fetchDatasets();
+      success('Dataset deleted successfully');
+    } catch (err) {
+      error(deleteApi.error || 'Failed to delete dataset');
+    }
+  };
+
   return (
     <div className={styles.app}>
       <Header />
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
       
       <main className={styles.main}>
         <div className={styles.container}>
@@ -71,10 +106,12 @@ export default function App() {
               Customer <span className={styles.accent}>Segmentation</span>
             </h1>
             <p className={styles.subtitle}>
-              Upload your customer data, configure clustering parameters, and discover 
-              meaningful customer segments using hierarchical clustering algorithms.
+              Discover meaningful customer segments using hierarchical clustering. 
+              Upload your data, configure the analysis, and visualize the results.
             </p>
           </motion.div>
+
+          <StepIndicator currentStep={getCurrentStep()} />
 
           <div className={styles.layout}>
             <aside className={styles.sidebar}>
@@ -89,6 +126,7 @@ export default function App() {
                 datasets={datasets}
                 selectedId={selectedDataset?.id}
                 onSelect={handleDatasetSelect}
+                onDelete={handleDeleteDataset}
               />
             </aside>
 
@@ -103,24 +141,28 @@ export default function App() {
                     className={styles.configSection}
                   >
                     <div className={styles.selectedInfo}>
-                      <span className={styles.selectedLabel}>Selected Dataset:</span>
-                      <span className={styles.selectedName}>{selectedDataset.name}</span>
+                      <div className={styles.selectedDetails}>
+                        <span className={styles.selectedLabel}>Selected Dataset</span>
+                        <span className={styles.selectedName}>{selectedDataset.name}</span>
+                      </div>
+                      {clusteringResult && (
+                        <motion.button
+                          className={styles.resetBtn}
+                          onClick={handleReset}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          Run New Analysis
+                        </motion.button>
+                      )}
                     </div>
 
-                    <ClusteringConfig
-                      datasetId={selectedDataset.id}
-                      onTrain={handleTrain}
-                      loading={trainApi.loading}
-                    />
-
-                    {trainApi.error && (
-                      <motion.div
-                        className={styles.errorBanner}
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                      >
-                        {trainApi.error}
-                      </motion.div>
+                    {!clusteringResult && (
+                      <ClusteringConfig
+                        datasetId={selectedDataset.id}
+                        onTrain={handleTrain}
+                        loading={trainApi.loading}
+                      />
                     )}
                   </motion.div>
                 ) : (
@@ -131,9 +173,36 @@ export default function App() {
                     exit={{ opacity: 0 }}
                     className={styles.placeholder}
                   >
-                    <div className={styles.placeholderIcon}>📊</div>
-                    <h3>Select a Dataset</h3>
-                    <p>Upload a CSV file or select an existing dataset to start clustering</p>
+                    <motion.div 
+                      className={styles.placeholderIcon}
+                      animate={{ 
+                        y: [0, -10, 0],
+                        rotate: [0, 5, -5, 0]
+                      }}
+                      transition={{ 
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      📊
+                    </motion.div>
+                    <h3>Get Started</h3>
+                    <p>Upload a CSV file or select an existing dataset to begin customer segmentation</p>
+                    <div className={styles.placeholderSteps}>
+                      <div className={styles.placeholderStep}>
+                        <span className={styles.stepNumber}>1</span>
+                        <span>Upload Data</span>
+                      </div>
+                      <div className={styles.placeholderStep}>
+                        <span className={styles.stepNumber}>2</span>
+                        <span>Configure</span>
+                      </div>
+                      <div className={styles.placeholderStep}>
+                        <span className={styles.stepNumber}>3</span>
+                        <span>Analyze</span>
+                      </div>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -156,9 +225,12 @@ export default function App() {
       </main>
 
       <footer className={styles.footer}>
-        <p>Powered by Hierarchical Clustering • FastAPI • PostgreSQL</p>
+        <p>
+          <span className={styles.footerBrand}>SegmentIQ</span>
+          {' • '}
+          Powered by Hierarchical Clustering & Python
+        </p>
       </footer>
     </div>
   );
 }
-

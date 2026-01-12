@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     APP_NAME: str = "Customer Segmentation API"
     ENV: str = "dev"
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/segmentation"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./segmentation.db"
     UPLOAD_DIR: str = "data"
     OUTPUT_DIR: str = "outputs"
 

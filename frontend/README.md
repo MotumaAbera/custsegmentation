@@ -1,26 +1,8 @@
-# Customer Segmentation Frontend
+# SegmentIQ Frontend
 
-Modern React frontend for the Customer Segmentation API.
-
-## Features
-
-- **Drag & Drop Upload**: Upload CSV datasets with a beautiful drag-and-drop interface
-- **Interactive Configuration**: Configure clustering parameters with visual controls
-- **Real-time Results**: View clustering metrics, distribution charts, and dendrograms
-- **Responsive Design**: Works seamlessly on desktop and mobile
-
-## Tech Stack
-
-- **React 18** with Hooks
-- **Vite** for development and building
-- **Framer Motion** for animations
-- **Recharts** for data visualization
-- **Lucide React** for icons
-- **CSS Modules** for styling
+React frontend for customer segmentation visualization.
 
 ## Quick Start
-
-### Development
 
 ```bash
 # Install dependencies
@@ -28,58 +10,161 @@ npm install
 
 # Start development server
 npm run dev
-```
 
-The app will be available at **http://localhost:3000**
-
-### Production Build
-
-```bash
+# Build for production
 npm run build
-npm run preview
 ```
 
-## Docker
+## Tech Stack
 
-Build and run with Docker:
-
-```bash
-docker build -t segmentation-frontend .
-docker run -p 80:80 segmentation-frontend
-```
+- **React 18** - UI library
+- **Vite** - Build tool
+- **Framer Motion** - Animations
+- **Recharts** - Charts
+- **Lucide React** - Icons
+- **React Dropzone** - File upload
 
 ## Project Structure
 
 ```
-src/
-├── components/
-│   ├── Header.jsx          # Navigation header
-│   ├── FileUpload.jsx      # Drag & drop upload
-│   ├── DatasetList.jsx     # Dataset selector
-│   ├── ClusteringConfig.jsx # Configuration form
-│   └── Results.jsx         # Results visualization
-├── services/
-│   └── api.js              # API client
-├── hooks/
-│   └── useApi.js           # API hook
-├── styles/
-│   └── globals.css         # Global styles
-├── App.jsx                 # Main app component
-└── main.jsx                # Entry point
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── Header.jsx           # Navigation header
+│   │   ├── FileUpload.jsx       # CSV upload
+│   │   ├── DatasetList.jsx      # Dataset list
+│   │   ├── ClusteringConfig.jsx # Config form
+│   │   ├── Results.jsx          # Results display
+│   │   ├── StepIndicator.jsx    # Progress steps
+│   │   ├── Toast.jsx            # Notifications
+│   │   ├── Tooltip.jsx          # Tooltips
+│   │   └── TrainingProgress.jsx # Training animation
+│   ├── hooks/
+│   │   ├── useApi.js            # API wrapper
+│   │   └── useToast.js          # Toast hook
+│   ├── services/
+│   │   └── api.js               # API client
+│   ├── styles/
+│   │   └── globals.css          # Global styles
+│   ├── App.jsx                  # Main app
+│   └── main.jsx                 # Entry point
+├── public/
+├── index.html
+├── package.json
+└── vite.config.js
 ```
 
-## Design
+## Features
 
-- **Color Palette**: Dark theme with gold accent (#c4a052)
-- **Typography**: 
-  - Instrument Serif for headings
-  - Sora for body text
-  - JetBrains Mono for code/data
-- **Animations**: Smooth transitions and micro-interactions
+- 📁 Drag-and-drop CSV upload
+- ⚙️ Interactive clustering configuration
+- 📊 Tabbed results view (Overview, Distribution, Dendrogram)
+- 🔔 Toast notifications
+- 💡 Helpful tooltips
+- ⏳ Training progress animation
+- 📱 Responsive design
 
-## Environment
+## Scripts
 
-The app proxies API requests to `http://localhost:8000` in development.
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview build |
+| `npm run lint` | Run ESLint |
 
-For production, configure the nginx proxy to point to your API server.
+## Configuration
 
+### API Proxy
+
+In `vite.config.js`:
+
+```javascript
+export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
+  },
+});
+```
+
+### Environment Variables
+
+Create `.env`:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+## Styling
+
+Uses CSS Modules with CSS variables:
+
+```css
+/* globals.css */
+:root {
+  --accent-primary: #c4a052;
+  --bg-primary: #0a0a0b;
+  --text-primary: #fafafa;
+}
+```
+
+## Components
+
+### FileUpload
+
+```jsx
+<FileUpload
+  onUpload={handleUpload}
+  loading={isUploading}
+  error={uploadError}
+  success={uploadSuccess}
+/>
+```
+
+### ClusteringConfig
+
+```jsx
+<ClusteringConfig
+  datasetId={selectedDataset.id}
+  onTrain={handleTrain}
+  loading={isTraining}
+/>
+```
+
+### Results
+
+```jsx
+<Results run={clusteringResult} />
+```
+
+## Hooks
+
+### useApi
+
+```jsx
+const uploadApi = useApi(uploadDataset);
+
+await uploadApi.execute(file);
+console.log(uploadApi.loading, uploadApi.error, uploadApi.data);
+```
+
+### useToast
+
+```jsx
+const { success, error, warning } = useToast();
+
+success('Operation completed!');
+error('Something went wrong');
+```
+
+## Browser Support
+
+- Chrome 90+
+- Firefox 90+
+- Safari 14+
+- Edge 90+

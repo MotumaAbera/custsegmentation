@@ -14,12 +14,13 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .hero {
   text-align: center;
-  padding: 2rem 0 1rem;
+  padding: 2.5rem 0 1.5rem;
+  position: relative;
 }
 
 .heading {
@@ -27,13 +28,13 @@
   font-size: 3.5rem;
   font-weight: 400;
   line-height: 1.1;
-  color: var(--text-primary);
   letter-spacing: -0.02em;
   margin-bottom: 1rem;
+  color: #000000;
 }
 
 .accent {
-  color: var(--accent-primary);
+  color: #132787;
   font-style: italic;
 }
 
@@ -43,11 +44,12 @@
   font-size: 1.0625rem;
   color: var(--text-secondary);
   line-height: 1.7;
+  padding: 0 1rem;
 }
 
 .layout {
   display: grid;
-  grid-template-columns: 380px 1fr;
+  grid-template-columns: 400px 1fr;
   gap: 2rem;
   align-items: start;
 }
@@ -73,16 +75,29 @@
 .selectedInfo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
   padding: 1rem 1.25rem;
-  background: var(--accent-muted);
+  background: var(--bg-card);
   border: 1px solid var(--border-accent);
   border-radius: var(--radius-lg);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.selectedDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .selectedLabel {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .selectedName {
@@ -90,6 +105,27 @@
   font-size: 0.9375rem;
   font-weight: 500;
   color: var(--accent-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resetBtn {
+  padding: 0.625rem 1rem;
+  background: var(--accent-muted);
+  color: var(--accent-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-accent);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.resetBtn:hover {
+  background: var(--accent-primary);
+  color: #ffffff;
 }
 
 .errorBanner {
@@ -106,36 +142,78 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.5rem;
   padding: 4rem 2rem;
-  background: var(--bg-card);
-  border: 2px dashed var(--border-color);
+  background: #ffffff;
+  border: 2px solid var(--border-color);
   border-radius: var(--radius-xl);
   text-align: center;
+  box-shadow: var(--shadow-sm);
 }
 
 .placeholderIcon {
-  font-size: 3rem;
-  opacity: 0.5;
+  font-size: 4rem;
 }
 
 .placeholder h3 {
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 400;
-  color: var(--text-primary);
+  color: #000000;
 }
 
 .placeholder p {
   font-size: 0.9375rem;
   color: var(--text-muted);
-  max-width: 300px;
+  max-width: 350px;
+  margin-bottom: 1rem;
+}
+
+.placeholderSteps {
+  display: flex;
+  gap: 2rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.placeholderStep {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #000000;
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: all 0.3s ease;
+}
+
+.placeholderStep:hover {
+  border-color: #132787;
+  box-shadow: var(--shadow-sm);
+}
+
+.stepNumber {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #132787;
+  color: #ffffff;
 }
 
 .footer {
   padding: 1.5rem 2rem;
   text-align: center;
   border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .footer p {
@@ -143,23 +221,45 @@
   color: var(--text-muted);
 }
 
+.footerBrand {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  color: var(--accent-primary);
+}
+
+/* Large Tablet */
 @media (max-width: 1024px) {
   .layout {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .sidebar {
     position: static;
+    order: -1;
   }
 
   .heading {
     font-size: 2.5rem;
   }
+
+  .content {
+    min-height: auto;
+  }
 }
 
-@media (max-width: 640px) {
+/* Small Tablet */
+@media (max-width: 768px) {
   .main {
     padding: 1rem;
+  }
+
+  .container {
+    gap: 1.25rem;
+  }
+
+  .hero {
+    padding: 1.25rem 0 0.75rem;
   }
 
   .heading {
@@ -168,6 +268,153 @@
 
   .subtitle {
     font-size: 0.9375rem;
+    padding: 0 0.5rem;
+  }
+
+  .layout {
+    gap: 1.25rem;
+  }
+
+  .sidebar {
+    gap: 1rem;
+  }
+
+  .placeholder {
+    padding: 2rem 1.25rem;
+  }
+
+  .placeholderIcon {
+    font-size: 3rem;
+  }
+
+  .placeholder h3 {
+    font-size: 1.5rem;
+  }
+
+  .placeholder p {
+    font-size: 0.875rem;
+    max-width: 100%;
+  }
+
+  .placeholderSteps {
+    gap: 0.75rem;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .placeholderStep {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0.75rem 1rem;
+  }
+
+  .footer {
+    padding: 1.25rem 1rem;
+  }
+
+  .footer p {
+    font-size: 0.8125rem;
+    line-height: 1.5;
   }
 }
 
+/* Mobile */
+@media (max-width: 480px) {
+  .main {
+    padding: 0.75rem;
+  }
+
+  .container {
+    gap: 1rem;
+  }
+
+  .hero {
+    padding: 1rem 0 0.5rem;
+  }
+
+  .heading {
+    font-size: 1.625rem;
+    margin-bottom: 0.625rem;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    padding: 0;
+  }
+
+  .layout {
+    gap: 1rem;
+  }
+
+  .selectedInfo {
+    padding: 0.875rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .selectedLabel {
+    font-size: 0.6875rem;
+  }
+
+  .selectedName {
+    font-size: 0.875rem;
+  }
+
+  .resetBtn {
+    width: 100%;
+    text-align: center;
+    padding: 0.875rem;
+    min-height: 44px;
+  }
+
+  .placeholder {
+    padding: 1.5rem 1rem;
+  }
+
+  .placeholderIcon {
+    font-size: 2.5rem;
+  }
+
+  .placeholder h3 {
+    font-size: 1.125rem;
+  }
+
+  .placeholder p {
+    font-size: 0.8125rem;
+  }
+
+  .placeholderSteps {
+    gap: 0.5rem;
+  }
+
+  .placeholderStep {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+
+  .stepNumber {
+    width: 24px;
+    height: 24px;
+    font-size: 0.6875rem;
+  }
+
+  .footer {
+    padding: 1rem 0.75rem;
+  }
+
+  .footer p {
+    font-size: 0.75rem;
+  }
+
+  .footerBrand {
+    font-size: 0.8125rem;
+  }
+
+  .errorBanner {
+    padding: 0.875rem;
+    font-size: 0.8125rem;
+  }
+}
