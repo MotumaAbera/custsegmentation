@@ -1555,3 +1555,6 @@ The system is specifically designed for **Ethiopian supermarket analytics** but 
   <em>Powered by Python, FastAPI, React & Scikit-learn</em>
 </p>
 
+
+
+

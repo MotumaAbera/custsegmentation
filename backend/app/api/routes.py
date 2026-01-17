@@ -18,10 +18,18 @@ from app.schemas.clustering import (
 from app.schemas.dataset import DatasetListResponse, DatasetResponse
 from app.services.clustering import (
     generate_dendrogram,
+    generate_distribution_chart,
+    generate_scatter_plot,
     get_flat_clusters,
     perform_hierarchical_clustering,
 )
-from app.services.io import load_csv, save_dendrogram, save_uploaded_file
+from app.services.io import (
+    load_csv,
+    save_dendrogram,
+    save_distribution_chart,
+    save_scatter_plot,
+    save_uploaded_file,
+)
 from app.services.metrics import compile_metrics
 from app.services.preprocessing import (
     apply_pca,
@@ -345,5 +353,145 @@ async def get_dendrogram(
         path=str(path),
         media_type="image/png",
         filename=f"dendrogram_run_{run_id}.png",
+    )
+
+
+@router.get(
+    "/clustering/scatter/{run_id}",
+    tags=["Clustering"],
+    responses={
+        200: {
+            "content": {"image/png": {}},
+            "description": "Scatter plot image",
+        }
+    },
+)
+async def get_scatter_plot(
+    run_id: int,
+    x_feature: str = None,
+    y_feature: str = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get scatter plot visualization for a clustering run."""
+    result = await db.execute(select(ClusteringRun).where(ClusteringRun.id == run_id))
+    run = result.scalar_one_or_none()
+
+    if not run:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Clustering run with id {run_id} not found",
+        )
+
+    # Get assignments
+    assignments_result = await db.execute(
+        select(ClusterAssignment)
+        .where(ClusterAssignment.run_id == run_id)
+        .order_by(ClusterAssignment.row_index)
+    )
+    assignments = assignments_result.scalars().all()
+
+    if not assignments:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No cluster assignments found for this run",
+        )
+
+    # Determine features
+    numeric_features = run.feature_config.get("numeric_features", []) if run.feature_config else []
+    
+    if not numeric_features:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No numeric features available for scatter plot",
+        )
+
+    if not x_feature:
+        x_feature = numeric_features[0]
+    if not y_feature:
+        y_feature = numeric_features[1] if len(numeric_features) > 1 else numeric_features[0]
+
+    if x_feature not in numeric_features or y_feature not in numeric_features:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Features {x_feature} and/or {y_feature} not found in numeric features",
+        )
+
+    # Generate scatter plot
+    try:
+        fig = generate_scatter_plot(assignments, x_feature, y_feature, run_id)
+        scatter_path = save_scatter_plot(fig, run_id)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate scatter plot: {str(e)}",
+        )
+
+    path = Path(scatter_path)
+    if not path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Scatter plot file not found",
+        )
+
+    return FileResponse(
+        path=str(path),
+        media_type="image/png",
+        filename=f"scatter_plot_run_{run_id}.png",
+    )
+
+
+@router.get(
+    "/clustering/distribution/{run_id}",
+    tags=["Clustering"],
+    responses={
+        200: {
+            "content": {"image/png": {}},
+            "description": "Distribution chart image",
+        }
+    },
+)
+async def get_distribution_chart(
+    run_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get distribution chart visualization for a clustering run."""
+    result = await db.execute(select(ClusteringRun).where(ClusteringRun.id == run_id))
+    run = result.scalar_one_or_none()
+
+    if not run:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Clustering run with id {run_id} not found",
+        )
+
+    if not run.metrics or "cluster_sizes" not in run.metrics:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cluster metrics not available for this run",
+        )
+
+    cluster_sizes = run.metrics["cluster_sizes"]
+
+    # Generate distribution chart
+    try:
+        fig = generate_distribution_chart(cluster_sizes, run_id)
+        distribution_path = save_distribution_chart(fig, run_id)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate distribution chart: {str(e)}",
+        )
+
+    path = Path(distribution_path)
+    if not path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Distribution chart file not found",
+        )
+
+    return FileResponse(
+        path=str(path),
+        media_type="image/png",
+        filename=f"distribution_run_{run_id}.png",
     )
 

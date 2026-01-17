@@ -228,7 +228,7 @@ export default function App() {
         <p>
           <span className={styles.footerBrand}>SegmentIQ</span>
           {' • '}
-          Powered by Hierarchical Clustering & Python
+          Powered by Hierarchical Clustering, FastAPI & PostgreSQL
         </p>
       </footer>
     </div>

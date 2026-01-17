@@ -24,7 +24,7 @@ export default function ClusteringConfig({ datasetId, onTrain, loading }) {
     e.preventDefault();
     onTrain({
       dataset_id: datasetId,
-      linkage_method: config.linkage,
+      linkage: config.linkage,
       n_clusters: config.n_clusters,
       use_pca: config.use_pca,
       pca_components: config.use_pca ? config.pca_components : null,

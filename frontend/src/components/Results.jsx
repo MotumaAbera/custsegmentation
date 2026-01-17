@@ -1,26 +1,65 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BarChart3, Target, Layers, TrendingUp, Image, Users, Table, Download, Sparkles } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { BarChart3, Target, Layers, TrendingUp, Image, Users, Table, Download, Sparkles, ScatterChart as ScatterIcon } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, ScatterChart, Scatter, ZAxis, Legend } from 'recharts';
+import { getDendrogramUrl, getSegments } from '../services/api';
 import styles from './Results.module.css';
 
 const CLUSTER_COLORS = [
-  '#c4a052', '#4ade80', '#60a5fa', '#f472b6', '#a78bfa',
-  '#fb923c', '#22d3d8', '#f87171', '#84cc16', '#e879f9',
+  '#22c55e', '#ef4444', '#3b82f6', '#f97316', '#a78bfa',
+  '#c4a052', '#22d3d8', '#f472b6', '#84cc16', '#e879f9',
 ];
 
 const TABS = [
   { id: 'overview', label: 'Overview', icon: BarChart3 },
+  { id: 'scatter', label: 'Scatter Plot', icon: ScatterIcon },
   { id: 'distribution', label: 'Distribution', icon: Layers },
   { id: 'dendrogram', label: 'Dendrogram', icon: Image },
 ];
 
 export default function Results({ run }) {
   const [activeTab, setActiveTab] = useState('overview');
+  const [scatterData, setScatterData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [axisFeatures, setAxisFeatures] = useState({ x: null, y: null });
+
+  // Fetch segment data for scatter plot
+  useEffect(() => {
+    if (!run?.id) return;
+    
+    const fetchSegments = async () => {
+      setLoading(true);
+      try {
+        const data = await getSegments(run.id);
+        if (data?.assignments) {
+          // Get numeric features for axis selection
+          const numericFeatures = run.feature_config?.numeric_features || [];
+          const xFeature = numericFeatures[0] || null;
+          const yFeature = numericFeatures[1] || numericFeatures[0] || null;
+          setAxisFeatures({ x: xFeature, y: yFeature });
+          
+          // Transform assignments to scatter data
+          const transformed = data.assignments.map((a) => ({
+            ...a.payload,
+            cluster: a.cluster_label,
+            clusterName: `Cluster ${a.cluster_label + 1}`,
+          }));
+          setScatterData(transformed);
+        }
+      } catch (err) {
+        console.error('Failed to fetch segments:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSegments();
+  }, [run?.id, run?.feature_config?.numeric_features]);
 
   if (!run) return null;
 
   const { metrics, feature_config } = run;
+  const numericFeatures = feature_config?.numeric_features || [];
   const clusterData = metrics?.cluster_sizes
     ? Object.entries(metrics.cluster_sizes).map(([label, count]) => ({
         name: `Cluster ${parseInt(label) + 1}`,
@@ -55,21 +94,19 @@ export default function Results({ run }) {
           </div>
           <div>
             <h3 className={styles.title}>Clustering Results</h3>
-            <span className={styles.subtitle}>{run.linkage_method?.toUpperCase() || 'WARD'} linkage</span>
+            <span className={styles.subtitle}>Run #{run.id} • {run.linkage.toUpperCase()} linkage</span>
           </div>
         </div>
-        {run.dendrogram && (
-          <motion.a
-            href={run.dendrogram}
-            download="dendrogram.png"
-            className={styles.downloadBtn}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Download size={16} />
-            Export
-          </motion.a>
-        )}
+        <motion.a
+          href={getDendrogramUrl(run.id)}
+          download={`dendrogram_run_${run.id}.png`}
+          className={styles.downloadBtn}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Download size={16} />
+          Export
+        </motion.a>
       </div>
 
       {/* Tabs */}
@@ -203,6 +240,122 @@ export default function Results({ run }) {
           </motion.div>
         )}
 
+        {activeTab === 'scatter' && (
+          <motion.div
+            key="scatter"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className={styles.tabContent}
+          >
+            <div className={styles.scatterCard}>
+              <div className={styles.scatterHeader}>
+                <h4 className={styles.cardTitle}>
+                  <ScatterIcon size={16} />
+                  Cluster Visualization
+                </h4>
+                {numericFeatures.length >= 2 && (
+                  <div className={styles.axisSelectors}>
+                    <div className={styles.axisSelector}>
+                      <label>X-Axis:</label>
+                      <select 
+                        value={axisFeatures.x || ''} 
+                        onChange={(e) => setAxisFeatures(prev => ({ ...prev, x: e.target.value }))}
+                      >
+                        {numericFeatures.map((f) => (
+                          <option key={f} value={f}>{f}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className={styles.axisSelector}>
+                      <label>Y-Axis:</label>
+                      <select 
+                        value={axisFeatures.y || ''} 
+                        onChange={(e) => setAxisFeatures(prev => ({ ...prev, y: e.target.value }))}
+                      >
+                        {numericFeatures.map((f) => (
+                          <option key={f} value={f}>{f}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {loading ? (
+                <div className={styles.scatterLoading}>
+                  <motion.div 
+                    className={styles.loadingSpinner}
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  />
+                  <span>Loading cluster data...</span>
+                </div>
+              ) : scatterData.length > 0 && axisFeatures.x && axisFeatures.y ? (
+                <div className={styles.scatterWrapper}>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                      <XAxis 
+                        type="number" 
+                        dataKey={axisFeatures.x} 
+                        name={axisFeatures.x}
+                        stroke="var(--text-muted)" 
+                        fontSize={12}
+                        label={{ value: axisFeatures.x, position: 'bottom', fill: 'var(--text-secondary)', fontSize: 12 }}
+                      />
+                      <YAxis 
+                        type="number" 
+                        dataKey={axisFeatures.y} 
+                        name={axisFeatures.y}
+                        stroke="var(--text-muted)" 
+                        fontSize={12}
+                        label={{ value: axisFeatures.y, angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)', fontSize: 12 }}
+                      />
+                      <ZAxis range={[80, 80]} />
+                      <Tooltip content={<ScatterTooltip xKey={axisFeatures.x} yKey={axisFeatures.y} />} />
+                      {/* Render each cluster as a separate Scatter */}
+                      {Array.from(new Set(scatterData.map(d => d.cluster))).sort((a, b) => a - b).map((clusterId) => (
+                        <Scatter
+                          key={clusterId}
+                          name={`Cluster ${clusterId + 1}`}
+                          data={scatterData.filter(d => d.cluster === clusterId)}
+                          fill={CLUSTER_COLORS[clusterId % CLUSTER_COLORS.length]}
+                        />
+                      ))}
+                      <Legend 
+                        wrapperStyle={{ paddingTop: '20px' }}
+                        formatter={(value) => <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{value}</span>}
+                      />
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className={styles.scatterEmpty}>
+                  <p>No numeric features available for scatter plot visualization.</p>
+                  <p className={styles.scatterHint}>Upload a dataset with at least 2 numeric columns.</p>
+                </div>
+              )}
+              
+              {/* Cluster Legend */}
+              {scatterData.length > 0 && (
+                <div className={styles.scatterLegend}>
+                  {clusterData.map((entry, index) => (
+                    <div key={entry.name} className={styles.scatterLegendItem}>
+                      <span 
+                        className={styles.scatterLegendColor} 
+                        style={{ background: CLUSTER_COLORS[index % CLUSTER_COLORS.length] }}
+                      />
+                      <span className={styles.scatterLegendLabel}>{entry.name}</span>
+                      <span className={styles.scatterLegendCount}>{entry.value} points</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
         {activeTab === 'distribution' && (
           <motion.div
             key="distribution"
@@ -316,20 +469,14 @@ export default function Results({ run }) {
                 </p>
               </div>
               <div className={styles.dendrogramWrapper}>
-                {run.dendrogram ? (
-                  <motion.img
-                    src={run.dendrogram}
-                    alt="Dendrogram"
-                    className={styles.dendrogram}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                  />
-                ) : (
-                  <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                    Dendrogram not available
-                  </p>
-                )}
+                <motion.img
+                  src={getDendrogramUrl(run.id)}
+                  alt="Dendrogram"
+                  className={styles.dendrogram}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                />
               </div>
             </div>
           </motion.div>
@@ -369,6 +516,22 @@ function CustomTooltip({ active, payload }) {
     <div className={styles.customTooltip}>
       <strong>{data.name}</strong>
       <p>{data.value} customers ({data.percentage}%)</p>
+    </div>
+  );
+}
+
+function ScatterTooltip({ active, payload, xKey, yKey }) {
+  if (!active || !payload?.length) return null;
+
+  const data = payload[0].payload;
+  return (
+    <div className={styles.customTooltip}>
+      <strong style={{ color: CLUSTER_COLORS[data.cluster % CLUSTER_COLORS.length] }}>
+        Cluster {data.cluster + 1}
+      </strong>
+      <p>{xKey}: {data[xKey]}</p>
+      <p>{yKey}: {data[yKey]}</p>
+      {data.customer_id && <p style={{ opacity: 0.7, fontSize: '0.75rem' }}>ID: {data.customer_id}</p>}
     </div>
   );
 }
